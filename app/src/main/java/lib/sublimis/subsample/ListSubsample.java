@@ -39,7 +39,7 @@ import java.util.List;
  * Two input segments will be merged in the output unless they are separated by more than the bucket size.
  *
  * @author Sublimis
- * @version 2.0 (2021-09-27)
+ * @version 2.1 (2021-12-04)
  */
 public class ListSubsample<T>
 {
@@ -112,6 +112,7 @@ public class ListSubsample<T>
 			if (LSUtils.isValidAndNotEmpty(listList))
 			{
 				T min = null, max = null, first = null, last = null;
+				int minIndex = -1, maxIndex = -1;
 				double xBucket = 0;
 
 				List<T> oneSegment = new ArrayList<>();
@@ -133,7 +134,7 @@ public class ListSubsample<T>
 							{
 								if (shouldStartNewSegment(current, last, bucketSize))
 								{
-									insertPoint(oneSegment, min, max);
+									insertPoint(oneSegment, min, max, minIndex, maxIndex);
 
 									if (LSUtils.isValidAndNotEmpty(oneSegment))
 									{
@@ -143,19 +144,25 @@ public class ListSubsample<T>
 									}
 
 									min = max = current;
+									minIndex = maxIndex = index;
 									xBucket = getBucket(current, first, bucketSize);
 								}
 							}
 
-							if (last == null || xBucket != getBucket(current, first, bucketSize))
 							{
-								if (last != null)
-								{
-									insertPoint(oneSegment, min, max);
-								}
+								final double bucket = getBucket(current, first, bucketSize);
 
-								min = max = current;
-								xBucket = getBucket(current, first, bucketSize);
+								if (last == null || xBucket != bucket)
+								{
+									if (last != null)
+									{
+										insertPoint(oneSegment, min, max, minIndex, maxIndex);
+									}
+
+									min = max = current;
+									minIndex = maxIndex = index;
+									xBucket = bucket;
+								}
 							}
 
 							last = current;
@@ -163,18 +170,20 @@ public class ListSubsample<T>
 							if (mComparatorY.compare(current, min) < 0)
 							{
 								min = current;
+								minIndex = index;
 							}
 
 							if (mComparatorY.compare(current, max) >= 0)
 							{
 								// Prefer returning the rightmost element as "max" if all elements are equal (leftmost will be "min" in this case)
 								max = current;
+								maxIndex = index;
 							}
 						}
 					}
 				}
 
-				insertPoint(oneSegment, min, max);
+				insertPoint(oneSegment, min, max, minIndex, maxIndex);
 
 				if (LSUtils.isValidAndNotEmpty(oneSegment))
 				{
@@ -229,7 +238,7 @@ public class ListSubsample<T>
 		return retVal;
 	}
 
-	protected void insertPoint(final List<T> oneSegment, final T min, final T max)
+	protected void insertPoint(final List<T> oneSegment, final T min, final T max, final int minIndex, final int maxIndex)
 	{
 		if (min == null || max == null)
 		{
@@ -243,15 +252,28 @@ public class ListSubsample<T>
 		{
 			final int compare = mComparatorX.compare(min, max);
 
-			if (compare <= 0)
+			if (compare < 0)
 			{
 				oneSegment.add(min);
 				oneSegment.add(max);
 			}
-			else
+			else if (compare > 0)
 			{
 				oneSegment.add(max);
 				oneSegment.add(min);
+			}
+			else
+			{
+				if (minIndex <= maxIndex)
+				{
+					oneSegment.add(min);
+					oneSegment.add(max);
+				}
+				else
+				{
+					oneSegment.add(max);
+					oneSegment.add(min);
+				}
 			}
 		}
 	}
