@@ -52,8 +52,9 @@ You can find more info at [https://jitpack.io/#Sublimis/ListSubsample](https://j
 ## Example
 
 ```java
-final double bucketSize = 10;           // Adjust the bucket size according to your needs
 final List<List<T>> inputData = ...;    // Your data with elements of type T
+
+final double bucketSize = 10;           // Adjust the bucket size according to your needs
 
 final List<List<T>> sample = new ListSubsample<T>(inputData,
 	new ILSTransformer<T>()
