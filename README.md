@@ -11,6 +11,23 @@ Create an instance of this class by passing your [`List<List<T>>`](https://devel
 Input list(s) are assumed to be sorted by *X*-values in ascending order!
 
 
+## Results
+
+Original list had about 10 000 points. Chart width is about 1000 pixels.
+
+### Bucket size = 10
+
+![com.github.sublimis.listsubsample_1000_points.png](https://github.com/Sublimis/ListSubsample/blob/master/images/com.github.sublimis.listsubsample_1000_points.png)
+
+### Bucket size = 100
+
+![com.github.sublimis.listsubsample_100_points.png](https://github.com/Sublimis/ListSubsample/blob/master/images/com.github.sublimis.listsubsample_100_points.png)
+
+### Bucket size = 1000
+
+![com.github.sublimis.listsubsample_10_points.png](https://github.com/Sublimis/ListSubsample/blob/master/images/com.github.sublimis.listsubsample_10_points.png)
+
+
 ## About the algorithm
 
 Complexity of the algorithm is just **O(n)**.
@@ -30,23 +47,6 @@ implementation 'com.github.Sublimis:ListSubsample:v2.1'
 ```
 
 You can find more info at [https://jitpack.io/#Sublimis/ListSubsample](https://jitpack.io/#Sublimis/ListSubsample).
-
-
-## Results
-
-Original list had about 10 000 points. Chart width is about 1000 pixels.
-
-### Bucket size = 10
-
-![com.github.sublimis.listsubsample_1000_points.png](https://github.com/Sublimis/ListSubsample/blob/master/images/com.github.sublimis.listsubsample_1000_points.png)
-
-### Bucket size = 100
-
-![com.github.sublimis.listsubsample_100_points.png](https://github.com/Sublimis/ListSubsample/blob/master/images/com.github.sublimis.listsubsample_100_points.png)
-
-### Bucket size = 1000
-
-![com.github.sublimis.listsubsample_10_points.png](https://github.com/Sublimis/ListSubsample/blob/master/images/com.github.sublimis.listsubsample_10_points.png)
 
 
 ## Example
