@@ -16,14 +16,17 @@ Input list(s) are assumed to be sorted by *X*-values in ascending order!
 Original list had about 10 000 points. Chart width is about 1000 pixels.
 
 ### Bucket size = 10
+(1000 points)
 
 ![com.github.sublimis.listsubsample_1000_points.png](https://github.com/Sublimis/ListSubsample/blob/master/images/com.github.sublimis.listsubsample_1000_points.png)
 
 ### Bucket size = 100
+(100 points)
 
 ![com.github.sublimis.listsubsample_100_points.png](https://github.com/Sublimis/ListSubsample/blob/master/images/com.github.sublimis.listsubsample_100_points.png)
 
 ### Bucket size = 1000
+(10 points)
 
 ![com.github.sublimis.listsubsample_10_points.png](https://github.com/Sublimis/ListSubsample/blob/master/images/com.github.sublimis.listsubsample_10_points.png)
 
