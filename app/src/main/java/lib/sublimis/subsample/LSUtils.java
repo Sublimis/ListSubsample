@@ -19,7 +19,7 @@ import java.util.List;
 
 /**
  * @author Sublimis
- * @version 2.0 (2021-09-27)
+ * @version 3.0 (2024-04-04)
  */
 public class LSUtils
 {
@@ -30,6 +30,26 @@ public class LSUtils
 		if (list != null && !list.isEmpty())
 		{
 			retVal = list.get(0);
+		}
+
+		return retVal;
+	}
+
+	public static <E> E getFirstFirst(final List<List<E>> listList)
+	{
+		E retVal = null;
+
+		if (isValidAndNotEmpty(listList))
+		{
+			for (final List<E> list : listList)
+			{
+				retVal = getFirst(list);
+
+				if (retVal != null)
+				{
+					break;
+				}
+			}
 		}
 
 		return retVal;
@@ -79,35 +99,53 @@ public class LSUtils
 	{
 		LSPair<E, E> output = null;
 
-		List<E> firstSegment = null;
+		if (listList != null)
+		{
+			List<E> firstSegment = null;
+			{
+				for (final List<E> list : listList)
+				{
+					if (isValidAndNotEmpty(list))
+					{
+						firstSegment = list;
+						break;
+					}
+				}
+			}
+
+			List<E> lastSegment = null;
+			{
+				for (int i = listList.size() - 1; i >= 0; i--)
+				{
+					final List<E> list = listList.get(i);
+
+					if (isValidAndNotEmpty(list))
+					{
+						lastSegment = list;
+						break;
+					}
+				}
+			}
+
+			if (isValidAndNotEmpty(firstSegment) && isValidAndNotEmpty(lastSegment))
+			{
+				output = LSPair.create(getFirst(firstSegment), getLast(lastSegment));
+			}
+		}
+
+		return output;
+	}
+
+	public static <E> int getPointsCount(final List<List<E>> listList)
+	{
+		int output = 0;
+
+		if (listList != null)
 		{
 			for (final List<E> list : listList)
 			{
-				if (isValidAndNotEmpty(list))
-				{
-					firstSegment = list;
-					break;
-				}
+				output += list.size();
 			}
-		}
-
-		List<E> lastSegment = null;
-		{
-			for (int i = listList.size() - 1; i >= 0; i--)
-			{
-				final List<E> list = listList.get(i);
-
-				if (isValidAndNotEmpty(list))
-				{
-					lastSegment = list;
-					break;
-				}
-			}
-		}
-
-		if (isValidAndNotEmpty(firstSegment) && isValidAndNotEmpty(lastSegment))
-		{
-			output = LSPair.create(getFirst(firstSegment), getLast(lastSegment));
 		}
 
 		return output;

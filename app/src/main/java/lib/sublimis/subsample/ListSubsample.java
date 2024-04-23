@@ -39,7 +39,7 @@ import java.util.List;
  * Two input segments will be merged in the output unless they are separated by more than the bucket size.
  *
  * @author Sublimis
- * @version 2.1 (2021-12-04)
+ * @version 3.0 (2024-04-04)
  */
 public class ListSubsample<T>
 {
@@ -96,6 +96,7 @@ public class ListSubsample<T>
 	 *                   Elements from one bucket are going to be collapsed into a single sub-sampled "point" in the output ("point" usually consisting of two elements: min and max of the bucket).
 	 *                   <p>
 	 *                   Smaller value means more points in the output (finer sub-sampling).
+	 *                   Set to 0 or -1 to return all points.
 	 *                   <p>
 	 *                   If used with a charting library, a good value for this is the ratio: <code>(input window width) / (chart window width)</code>.
 	 *
@@ -105,114 +106,114 @@ public class ListSubsample<T>
 	{
 		final List<List<T>> output = new ArrayList<>();
 
-		if (mData != null && bucketSize > 0)
+		final List<List<T>> listList = mData;
+
+		if (LSUtils.isValidAndNotEmpty(listList))
 		{
-			final List<List<T>> listList = mData;
+			final T firstFirst = LSUtils.getFirstFirst(listList);
 
-			if (LSUtils.isValidAndNotEmpty(listList))
+			T min = null, max = null;
+			long minIndex = -1, maxIndex = -1;
+			T last = null;
+			double lastBucket = -1;
+
+			List<T> oneSegment = new ArrayList<>();
+
+			long globalIndex = 0;
+
+			for (final List<T> list : listList)
 			{
-				T min = null, max = null, first = null, last = null;
-				int minIndex = -1, maxIndex = -1;
-				double xBucket = 0;
-
-				List<T> oneSegment = new ArrayList<>();
-
-				for (final List<T> list : listList)
+				for (int index = 0; index < (list == null ? 0 : list.size()); index++, globalIndex++)
 				{
-					if (LSUtils.isValidAndNotEmpty(list))
+					final T current = list.get(index);
+
+					final double bucket = getBucket(current, firstFirst, bucketSize);
+
+					final boolean shouldStartNewSegment = index <= 0 && shouldStartNewSegment(current, last, bucketSize);
+
+					// Constant 1.25 is a heuristic to make the output look better (anything > 1.0 should work)
+					if (Math.abs(bucket - lastBucket) > 1.25 || shouldStartNewSegment)
 					{
-						for (int index = 0; index < list.size(); index++)
+						insertPoint(oneSegment, min, max, minIndex, maxIndex);
+
+						if (shouldStartNewSegment)
 						{
-							final T current = list.get(index);
-
-							if (first == null)
+							if (LSUtils.isValidAndNotEmpty(oneSegment))
 							{
-								first = current;
-							}
+								output.add(oneSegment);
 
-							if (index <= 0)
-							{
-								if (shouldStartNewSegment(current, last, bucketSize))
-								{
-									insertPoint(oneSegment, min, max, minIndex, maxIndex);
-
-									if (LSUtils.isValidAndNotEmpty(oneSegment))
-									{
-										output.add(oneSegment);
-
-										oneSegment = new ArrayList<>();
-									}
-
-									min = max = current;
-									minIndex = maxIndex = index;
-									xBucket = getBucket(current, first, bucketSize);
-								}
-							}
-
-							{
-								final double bucket = getBucket(current, first, bucketSize);
-
-								if (last == null || xBucket != bucket)
-								{
-									if (last != null)
-									{
-										insertPoint(oneSegment, min, max, minIndex, maxIndex);
-									}
-
-									min = max = current;
-									minIndex = maxIndex = index;
-									xBucket = bucket;
-								}
-							}
-
-							last = current;
-
-							if (mComparatorY.compare(current, min) < 0)
-							{
-								min = current;
-								minIndex = index;
-							}
-
-							if (mComparatorY.compare(current, max) >= 0)
-							{
-								// Prefer returning the rightmost element as "max" if all elements are equal (leftmost will be "min" in this case)
-								max = current;
-								maxIndex = index;
+								oneSegment = new ArrayList<>();
 							}
 						}
+
+						insertPoint(oneSegment, current, current, globalIndex, globalIndex);
+
+						min = max = null;
+						minIndex = maxIndex = -1;
+
+						lastBucket = bucket;
+						last = current;
+						continue;
+					}
+
+					if (last == null || lastBucket != bucket || bucket < 0)
+					{
+						if (last != null)
+						{
+							insertPoint(oneSegment, min, max, minIndex, maxIndex);
+						}
+
+						min = max = current;
+						minIndex = maxIndex = globalIndex;
+					}
+
+					lastBucket = bucket;
+					last = current;
+
+					if (min == null || mComparatorY.compare(current, min) < 0)
+					{
+						min = current;
+						minIndex = globalIndex;
+					}
+
+					if (max == null || mComparatorY.compare(current, max) >= 0)
+					{
+						// Prefer returning the rightmost element as "max" if all elements are equal (leftmost will be "min" in this case)
+						max = current;
+						maxIndex = globalIndex;
 					}
 				}
+			}
 
-				insertPoint(oneSegment, min, max, minIndex, maxIndex);
+			insertPoint(oneSegment, min, max, minIndex, maxIndex);
 
-				if (LSUtils.isValidAndNotEmpty(oneSegment))
+			if (LSUtils.isValidAndNotEmpty(oneSegment))
+			{
+				output.add(oneSegment);
+			}
+
+			// We want to make sure the output has the same first and last points as the input (a desired property)
+			if (LSUtils.isValidAndNotEmpty(output))
+			{
+				final LSPair<T, T> inputRange = LSUtils.getRange(listList);
+				final LSPair<T, T> outputRange = LSUtils.getRange(output);
+
+				if (inputRange != null && outputRange != null)
 				{
-					output.add(oneSegment);
-				}
+					final T inputFirst = inputRange.first;
+					final T inputLast = inputRange.second;
 
-				// We want to make sure the output has the same first and last points as the input (a desired property)
-				if (LSUtils.isValidAndNotEmpty(output))
-				{
-					final LSPair<T, T> inputRange = LSUtils.getRange(listList);
-					final LSPair<T, T> outputRange = LSUtils.getRange(output);
+					final T outputFirst = outputRange.first;
+					final T outputLast = outputRange.second;
 
-					if (inputRange != null && outputRange != null)
+					if (outputFirst != inputFirst)
 					{
-						final T inputFirst = inputRange.first;
-						final T inputLast = inputRange.second;
+						LSUtils.addFirst(LSUtils.getFirst(output), inputFirst);
+					}
 
-						final T outputFirst = outputRange.first;
-						final T outputLast = outputRange.second;
-
-						if (outputFirst != inputFirst)
-						{
-							LSUtils.addFirst(LSUtils.getFirst(output), inputFirst);
-						}
-
-						if (outputLast != inputLast)
-						{
-							LSUtils.addLast(LSUtils.getLast(output), inputLast);
-						}
+					if (outputLast != inputLast)
+					{
+						LSUtils.addLast(LSUtils.getLast(output), inputLast);
 					}
 				}
 			}
@@ -221,9 +222,39 @@ public class ListSubsample<T>
 		return output;
 	}
 
+	/**
+	 * @param pointsCount
+	 * @return Appropriately sub-sampled data. Returned data will always have the same first and last points as the original data.
+	 */
+	public List<List<T>> getSubsampleByCount(final int pointsCount, final double range)
+	{
+		final double bucketSize;
+		{
+			final int ourPointsCount = LSUtils.getPointsCount(mData);
+
+			if (1.5 * pointsCount >= ourPointsCount || pointsCount <= 0)
+			{
+				bucketSize = 0;
+			}
+			else
+			{
+				bucketSize = range / pointsCount;
+			}
+		}
+
+		return getSubsample(bucketSize);
+	}
+
 	protected double getBucket(final T current, final T first, final double bucketSize)
 	{
-		return Math.floor((mTransformer.getX(current) - mTransformer.getX(first)) / bucketSize);
+		if (bucketSize <= 0)
+		{
+			return -1;
+		}
+		else
+		{
+			return Math.floor((mTransformer.getX(current) - mTransformer.getX(first)) / bucketSize);
+		}
 	}
 
 	protected boolean shouldStartNewSegment(final T current, final T last, final double bucketSize)
@@ -232,13 +263,13 @@ public class ListSubsample<T>
 
 		if (last != null && current != null)
 		{
-			retVal = mTransformer.getX(current) - mTransformer.getX(last) > bucketSize;
+			retVal = mTransformer.getX(current) - mTransformer.getX(last) >= bucketSize;
 		}
 
 		return retVal;
 	}
 
-	protected void insertPoint(final List<T> oneSegment, final T min, final T max, final int minIndex, final int maxIndex)
+	protected void insertPoint(final List<T> oneSegment, final T min, final T max, final long minIndex, final long maxIndex)
 	{
 		if (min == null || max == null)
 		{
