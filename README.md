@@ -46,7 +46,7 @@ Two input segments will be merged in the output unless they are separated by mor
 Add the following line to your `build.gradle` file:
 
 ```groovy
-implementation 'com.github.Sublimis:ListSubsample:v3.0'
+implementation 'com.github.Sublimis:ListSubsample:3.0'
 ```
 
 You can find more info at [https://jitpack.io/#Sublimis/ListSubsample](https://jitpack.io/#Sublimis/ListSubsample).
