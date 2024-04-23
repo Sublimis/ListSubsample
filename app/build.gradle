@@ -1,4 +1,4 @@
-apply plugin: 'com.android.library'
+//apply plugin: 'com.android.library'
 apply plugin: 'maven-publish'
 
 group = 'com.github.Sublimis'
@@ -8,9 +8,7 @@ android {
         minSdk 21
         targetSdk 34
         versionCode 1
-        versionName "1.0"
-
-        testInstrumentationRunner "androidx.test.runner.AndroidJUnitRunner"
+        versionName "-"
     }
 
     buildTypes {
@@ -48,7 +46,7 @@ afterEvaluate {
                 // You can then customize attributes of the publication as shown below.
                 groupId = 'lib.sublimis.listsubsample'
                 artifactId = 'final'
-                version = '1.0'
+                version = '-'
             }
         }
     }
