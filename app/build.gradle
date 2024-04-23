@@ -1,16 +1,12 @@
-plugins {
-    id 'com.android.library'
-    id 'maven-publish'
-}
+apply plugin: 'com.android.library'
+apply plugin: 'maven-publish'
 
 group = 'com.github.Sublimis'
 
 android {
-    compileSdk 30
-
     defaultConfig {
-        minSdk 16
-        targetSdk 30
+        minSdk 21
+        targetSdk 34
         versionCode 1
         versionName "1.0"
 
@@ -23,10 +19,21 @@ android {
             proguardFiles getDefaultProguardFile('proguard-android-optimize.txt'), 'proguard-rules.pro'
         }
     }
-    buildToolsVersion '30.0.3'
-    compileSdkVersion 30
-}
 
+    compileSdk 34
+
+    namespace 'lib.sublimis.subsample'
+    compileOptions {
+        sourceCompatibility JavaVersion.VERSION_17
+        targetCompatibility JavaVersion.VERSION_17
+    }
+    publishing {
+        singleVariant('release') {
+            withSourcesJar()
+            withJavadocJar()
+        }
+    }
+}
 
 // Because the components are created only during the afterEvaluate phase, you must
 // configure your publications using the afterEvaluate() lifecycle method.
@@ -48,5 +55,5 @@ afterEvaluate {
 }
 
 dependencies {
-    implementation 'androidx.annotation:annotation:1.2.0'
+    implementation 'androidx.annotation:annotation:1.7.1'
 }
