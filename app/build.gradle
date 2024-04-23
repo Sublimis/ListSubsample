@@ -1,32 +1,31 @@
 plugins {
-//    id 'com.android.library'
+    id 'com.android.library'
     id 'maven-publish'
 }
 
 group = 'com.github.Sublimis'
 
 android {
+    namespace 'lib.sublimis.subsample'
+    compileSdk 34
+
+
     defaultConfig {
         minSdk 21
         targetSdk 34
-        versionCode 1
-        versionName "-"
     }
 
     buildTypes {
         release {
             minifyEnabled false
-            proguardFiles getDefaultProguardFile('proguard-android-optimize.txt'), 'proguard-rules.pro'
         }
     }
 
-    compileSdk 34
-
-    namespace 'lib.sublimis.subsample'
     compileOptions {
         sourceCompatibility JavaVersion.VERSION_17
         targetCompatibility JavaVersion.VERSION_17
     }
+
     publishing {
         singleVariant('release') {
             withSourcesJar()
@@ -47,8 +46,6 @@ afterEvaluate {
 
                 // You can then customize attributes of the publication as shown below.
                 groupId = 'lib.sublimis.listsubsample'
-                artifactId = 'final'
-                version = '-'
             }
         }
     }
