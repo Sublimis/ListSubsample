@@ -7,7 +7,7 @@ group = 'com.github.Sublimis'
 
 android {
     namespace 'lib.sublimis.subsample'
-    compileSdk 34
+    compileSdk 33
 
 
     defaultConfig {
