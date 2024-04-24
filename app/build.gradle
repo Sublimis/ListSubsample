@@ -8,6 +8,8 @@ group = 'com.github.Sublimis'
 android {
     namespace 'lib.sublimis.subsample'
     compileSdk 30
+    buildToolsVersion '30.0.3'
+    compileSdkVersion 30
 
 
     defaultConfig {
